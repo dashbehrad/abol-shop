@@ -620,8 +620,35 @@
         });
       });
 
-      // Simple in-memory cart
+      // Cart (persisted to localStorage)
+      const STORAGE_KEY = "abol_cart";
       const cart = { items: [] };
+
+      function saveCart() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cart.items));
+        } catch (e) {
+          console.warn("Could not save cart", e);
+        }
+      }
+
+      function loadCartFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) cart.items = JSON.parse(raw) || [];
+          else cart.items = [];
+        } catch (e) {
+          cart.items = [];
+        }
+        renderCart();
+      }
+
+      // keep in-sync across tabs/windows
+      window.addEventListener("storage", (e) => {
+        if (e.key === STORAGE_KEY) {
+          loadCartFromStorage();
+        }
+      });
 
       function findProductElement(id) {
         return document.querySelector(`.product-card[data-id="${id}"]`);
@@ -659,6 +686,7 @@
             rawPrice: priceText,
           });
         }
+        saveCart();
         renderCart();
         // brief visual feedback
         const btn = el.querySelector(".add-to-cart");
@@ -712,6 +740,7 @@
         const it = cart.items.find((i) => i.id === id);
         if (it) {
           it.qty++;
+          saveCart();
           renderCart();
         }
       }
@@ -719,16 +748,19 @@
         const it = cart.items.find((i) => i.id === id);
         if (it) {
           it.qty = Math.max(1, it.qty - 1);
+          saveCart();
           renderCart();
         }
       }
       function removeItem(id) {
         cart.items = cart.items.filter((i) => i.id !== id);
+        saveCart();
         renderCart();
       }
       function clearCart() {
         if (confirm("آیا از پاک کردن سبد مطمئن هستید؟")) {
           cart.items = [];
+          saveCart();
           renderCart();
         }
       }
@@ -743,42 +775,10 @@
 
       function proceedToCheckout() {
         if (cart.items.length === 0) return alert("سبد خرید خالی است");
-        // populate checkout summary and scroll to section
-        const summary = document.getElementById("checkout-summary");
-        summary.innerHTML = "";
-        const ul = document.createElement("div");
-        ul.style.display = "flex";
-        ul.style.flexDirection = "column";
-        ul.style.gap = "10px";
-        let total = 0;
-        cart.items.forEach((it) => {
-          total += (it.price || 0) * it.qty;
-          const row = document.createElement("div");
-          row.style.display = "flex";
-          row.style.justifyContent = "space-between";
-          row.style.alignItems = "center";
-          row.innerHTML = `<div>${it.name} × ${it.qty}</div><div>${
-            it.rawPrice || "$" + it.price
-          }</div>`;
-          ul.appendChild(row);
-        });
-        const totalRow = document.createElement("div");
-        totalRow.style.marginTop = "12px";
-        totalRow.style.fontWeight = "800";
-        totalRow.style.color = "#00ff88";
-        totalRow.textContent = `جمع کل: $${Number.isFinite(total) ? total : 0}`;
-        summary.appendChild(ul);
-        summary.appendChild(totalRow);
-        const actions = document.createElement("div");
-        actions.style.marginTop = "16px";
-        actions.innerHTML = `<button class="btn-primary" onclick="confirmOrder()">تأیید و پرداخت</button> <button class="btn-ghost" onclick="(function(){document.getElementById('checkout').style.display='none'; toggleCart(true);})()">بازگشت به سبد</button>`;
-        summary.appendChild(actions);
-
-        document.getElementById("checkout").style.display = "block";
-        document
-          .getElementById("checkout")
-          .scrollIntoView({ behavior: "smooth" });
-        toggleCart(false);
+        // persist current cart for the checkout page
+        saveCart();
+        // open a new tab/window where user will enter info and confirm
+        window.open("checkout.html", "_blank");
       }
 
       function confirmOrder() {
