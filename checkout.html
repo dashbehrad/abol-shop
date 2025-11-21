@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسویه - شرکت ابول</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0b1220, #071016);
+        color: #e0e0e0;
+        padding: 24px;
+      }
+      .card {
+        background: rgba(26, 26, 46, 0.85);
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 900px;
+        margin: 20px auto;
+        border: 1px solid rgba(0, 212, 255, 0.08);
+      }
+      h1 {
+        color: #00d4ff;
+      }
+      .items {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: #b0b0b0;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(176, 176, 176, 0.08);
+        background: transparent;
+        color: #e0e0e0;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+      .btn-primary {
+        background: #00d4ff;
+        color: #071016;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: #b0b0b0;
+        border: 1px solid rgba(176, 176, 176, 0.08);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .success {
+        padding: 16px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #071016, #0b1822);
+        color: #00ff88;
+        margin-top: 12px;
+      }
+      @media (max-width: 720px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>تسویه حساب</h1>
+      <div id="items" class="items">
+        <!-- items go here -->
+      </div>
+
+      <div
+        id="total"
+        style="font-weight: 800; color: #00ff88; margin-bottom: 12px"
+      >
+        مجموع: $0
+      </div>
+
+      <div style="margin-top: 10px">
+        <label for="name">نام و نام خانوادگی</label>
+        <input id="name" placeholder="مثال: علی رضایی" />
+      </div>
+
+      <div style="margin-top: 10px">
+        <label for="phone">شماره تماس</label>
+        <input id="phone" placeholder="0912xxxxxxx" />
+      </div>
+
+      <div style="margin-top: 10px">
+        <label for="note">یادداشت (اختیاری)</label>
+        <textarea
+          id="note"
+          rows="3"
+          placeholder="آدرس، توضیحات تحویل و ..."
+        ></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" onclick="window.close()">انصراف</button>
+        <button class="btn-primary" onclick="confirmAndPlaceOrder()">
+          تأیید و ثبت سفارش
+        </button>
+      </div>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "abol_cart";
+
+      function loadCart() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          return JSON.parse(raw) || [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function render() {
+        const items = loadCart();
+        const container = document.getElementById("items");
+        container.innerHTML = "";
+        let total = 0;
+        items.forEach((it) => {
+          const row = document.createElement("div");
+          row.className = "item";
+          const priceVal = Number.isFinite(it.price) ? it.price : 0;
+          total += (priceVal || 0) * (it.qty || 1);
+          row.innerHTML = `<div style="display:flex;gap:12px;align-items:center"><img src="${
+            it.img || ""
+          }" style="width:48px;height:48px;object-fit:cover;border-radius:8px"/><div><div style="font-weight:700;color:#00d4ff">${
+            it.name
+          }</div><div style="font-size:13px;color:#b0b0b0">تعداد: ${
+            it.qty
+          }</div></div></div><div style="font-weight:700">${
+            it.rawPrice || "$" + (it.price || 0)
+          }</div>`;
+          container.appendChild(row);
+        });
+        document.getElementById("total").textContent = `مجموع: $${
+          Number.isFinite(total) ? total : 0
+        }`;
+      }
+
+      function confirmAndPlaceOrder() {
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        if (!name) return alert("لطفاً نام خود را وارد کنید");
+        if (!phone) return alert("لطفاً شماره تماس را وارد کنید");
+
+        const items = loadCart();
+        if (!items || items.length === 0) return alert("سبد خرید خالی است");
+
+        // In a real app you would POST this to a server.
+        const order = {
+          name,
+          phone,
+          note: document.getElementById("note").value || "",
+          items,
+          total: document.getElementById("total").textContent,
+          ts: Date.now(),
+        };
+
+        // store last order (optional)
+        try {
+          localStorage.setItem("abol_last_order", JSON.stringify(order));
+        } catch (e) {}
+
+        // clear cart so index page updates via storage event
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+        } catch (e) {}
+
+        // show success
+        const res = document.getElementById("result");
+        res.innerHTML = `<div class="success">سفارش شما با موفقیت ثبت شد. با تشکر ${name} — در اسرع وقت تماس خواهیم گرفت.</div>`;
+
+        // disable inputs
+        document.getElementById("name").disabled = true;
+        document.getElementById("phone").disabled = true;
+        document.getElementById("note").disabled = true;
+        document.querySelector(".btn-primary").disabled = true;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
