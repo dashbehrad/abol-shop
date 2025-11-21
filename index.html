@@ -155,6 +155,18 @@
         color: #00ff88;
       }
 
+      .add-to-cart {
+        margin-top: 12px;
+        display: inline-block;
+        background: #00d4ff;
+        color: #071016;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
       /* Team Section */
       .team {
         padding: 80px 0;
@@ -217,6 +229,105 @@
         cursor: pointer;
       }
 
+      /* Cart */
+      .cart-button {
+        background: linear-gradient(90deg, #00d4ff, #00ff88);
+        color: #071016;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 999px;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(0, 212, 255, 0.15);
+      }
+
+      .cart-count {
+        background: rgba(7, 16, 22, 0.9);
+        color: #00ff88;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+      }
+
+      .cart-drawer {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 420px;
+        max-width: 90%;
+        background: rgba(10, 12, 18, 0.98);
+        color: #e0e0e0;
+        transform: translateX(-110%);
+        transition: transform 0.32s ease;
+        z-index: 2000;
+        padding: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      }
+
+      .cart-drawer.open {
+        transform: translateX(0);
+      }
+
+      .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .cart-items {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 60vh;
+        overflow: auto;
+      }
+      .cart-item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+        padding-bottom: 12px;
+      }
+      .cart-item img {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .cart-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+      .btn-primary {
+        background: #00d4ff;
+        color: #071016;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: #b0b0b0;
+        border: 1px solid rgba(176, 176, 176, 0.08);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         .hero h1 {
@@ -260,6 +371,11 @@
           width: 40px;
           height: 40px;
         }
+
+        .cart-drawer {
+          width: 100%;
+          left: 0;
+        }
       }
     </style>
   </head>
@@ -279,7 +395,16 @@
             </svg>
             <span>شرکت ابول</span>
           </div>
-          <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+          <div style="display: flex; align-items: center; gap: 12px">
+            <button id="cart-button" class="cart-button" onclick="toggleCart()">
+              <span>سبد خرید</span>
+              <span id="cart-count" class="cart-count">0</span>
+            </button>
+
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+          </div>
+
           <nav>
             <ul id="nav-menu">
               <li><a href="#home">خانه</a></li>
@@ -302,7 +427,13 @@
       <div class="container">
         <h2 class="section-title">محصولات ما</h2>
         <div class="products-grid">
-          <div class="product-card">
+          <div
+            class="product-card"
+            data-id="1"
+            data-name="گاث گرل"
+            data-price="$∞"
+            data-img="goth.png"
+          >
             <img src="goth.png" alt="محصول 1" class="product-image" />
             <div class="product-info">
               <h3>گاث گرل</h3>
@@ -311,19 +442,37 @@
                 لیاقت نیاز داری
               </p>
               <div class="product-price">$∞</div>
+              <button class="add-to-cart" onclick="addToCart(1)">
+                افزودن به سبد
+              </button>
             </div>
           </div>
 
-          <div class="product-card">
+          <div
+            class="product-card"
+            data-id="2"
+            data-name="فمبوی"
+            data-price="$0"
+            data-img="femboy.png"
+          >
             <img src="femboy.png" alt="محصول 2" class="product-image" />
             <div class="product-info">
               <h3>فمبوی</h3>
               <p>موجوداتی که برای توجه دیگران حاضر هستند هر کاری بکنن</p>
               <div class="product-price">$0</div>
+              <button class="add-to-cart" onclick="addToCart(2)">
+                افزودن به سبد
+              </button>
             </div>
           </div>
 
-          <div class="product-card">
+          <div
+            class="product-card"
+            data-id="3"
+            data-name="تامبوی"
+            data-price="$1000"
+            data-img="tomboy.png"
+          >
             <img src="tomboy.png" alt="محصول 3" class="product-image" />
             <div class="product-info">
               <h3>تامبوی</h3>
@@ -332,15 +481,27 @@
                 مستقل باشند
               </p>
               <div class="product-price">$1000</div>
+              <button class="add-to-cart" onclick="addToCart(3)">
+                افزودن به سبد
+              </button>
             </div>
           </div>
 
-          <div class="product-card">
+          <div
+            class="product-card"
+            data-id="4"
+            data-name="دختر انیمه ای"
+            data-price="توافقی"
+            data-img="anime.png"
+          >
             <img src="anime.png" alt="محصول 4" class="product-image" />
             <div class="product-info">
               <h3>دختر انیمه ای</h3>
               <p>دختران دو بعدی که از دختران سه بعدی جذاب تر هستند</p>
               <div class="product-price">توافقی</div>
+              <button class="add-to-cart" onclick="addToCart(4)">
+                افزودن به سبد
+              </button>
             </div>
           </div>
         </div>
@@ -387,12 +548,55 @@
       </div>
     </section>
 
+    <!-- Checkout / Confirmation Section -->
+    <section id="checkout" style="display: none; padding: 60px 0">
+      <div class="container">
+        <h2 class="section-title">تأیید سفارش</h2>
+        <div
+          id="checkout-summary"
+          style="
+            background: rgba(26, 26, 46, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+          "
+        >
+          <!-- Summary populated by JS -->
+        </div>
+      </div>
+    </section>
+
     <footer>
       <div class="container">
         <p>&copy; شرکت ابول. تمامی حقوق محفوظ است.</p>
         <p>ساخته شده توسط: <strong>behrad</strong></p>
       </div>
     </footer>
+
+    <!-- Cart Drawer -->
+    <aside id="cart-drawer" class="cart-drawer" aria-hidden="true">
+      <div class="cart-header">
+        <h3>سبد خرید شما</h3>
+        <div>
+          <button class="btn-ghost" onclick="toggleCart()">بستن</button>
+        </div>
+      </div>
+
+      <div id="cart-items" class="cart-items">
+        <!-- items injected by JS -->
+      </div>
+
+      <div class="cart-actions">
+        <div id="cart-total" style="font-weight: 700; color: #00ff88">
+          مجموع: $0
+        </div>
+        <div>
+          <button class="btn-ghost" onclick="clearCart()">پاک کردن</button>
+          <button class="btn-primary" onclick="proceedToCheckout()">
+            تسویه و ادامه
+          </button>
+        </div>
+      </div>
+    </aside>
 
     <script>
       function toggleMenu() {
@@ -415,7 +619,184 @@
           }
         });
       });
+
+      // Simple in-memory cart
+      const cart = { items: [] };
+
+      function findProductElement(id) {
+        return document.querySelector(`.product-card[data-id="${id}"]`);
+      }
+
+      function parsePriceString(priceStr) {
+        // Extract digits if present, otherwise return 0 for 'توافقی' or non-numeric
+        const match = String(priceStr).match(/([0-9,]+(?:\.[0-9]+)?)/);
+        if (!match) return 0;
+        return parseFloat(match[1].replace(/,/g, ""));
+      }
+
+      function addToCart(id) {
+        const el = findProductElement(id);
+        if (!el) return alert("محصول پیدا نشد");
+        const name =
+          el.dataset.name || el.querySelector("h3")?.innerText || "محصول";
+        const priceText =
+          el.dataset.price ||
+          el.querySelector(".product-price")?.innerText ||
+          "0";
+        const img = el.dataset.img || el.querySelector("img")?.src || "";
+        const price = parsePriceString(priceText);
+
+        const existing = cart.items.find((i) => i.id === String(id));
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          cart.items.push({
+            id: String(id),
+            name,
+            price,
+            img,
+            qty: 1,
+            rawPrice: priceText,
+          });
+        }
+        renderCart();
+        // brief visual feedback
+        const btn = el.querySelector(".add-to-cart");
+        if (btn) {
+          btn.textContent = "افزوده شد";
+          setTimeout(() => (btn.textContent = "افزودن به سبد"), 900);
+        }
+      }
+
+      function renderCart() {
+        const container = document.getElementById("cart-items");
+        const countEl = document.getElementById("cart-count");
+        container.innerHTML = "";
+        let total = 0;
+        let count = 0;
+        cart.items.forEach((item) => {
+          count += item.qty;
+          total += (item.price || 0) * item.qty;
+          const node = document.createElement("div");
+          node.className = "cart-item";
+          node.innerHTML = `
+            <img src="${item.img}" alt="${item.name}">
+            <div style="flex:1">
+              <div style="font-weight:700;color:#00d4ff">${item.name}</div>
+              <div style="color:#b0b0b0;font-size:13px">قیمت: ${
+                item.rawPrice || "$" + (item.price || 0)
+              }</div>
+              <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                <button class="btn-ghost" onclick="decreaseQty('${
+                  item.id
+                }')">-</button>
+                <div style="min-width:28px;text-align:center">${item.qty}</div>
+                <button class="btn-ghost" onclick="increaseQty('${
+                  item.id
+                }')">+</button>
+                <button class="btn-ghost" style="margin-right:8px" onclick="removeItem('${
+                  item.id
+                }')">حذف</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(node);
+        });
+        document.getElementById("cart-total").textContent = `مجموع: $${
+          Number.isFinite(total) ? total : 0
+        }`;
+        countEl.textContent = count;
+      }
+
+      function increaseQty(id) {
+        const it = cart.items.find((i) => i.id === id);
+        if (it) {
+          it.qty++;
+          renderCart();
+        }
+      }
+      function decreaseQty(id) {
+        const it = cart.items.find((i) => i.id === id);
+        if (it) {
+          it.qty = Math.max(1, it.qty - 1);
+          renderCart();
+        }
+      }
+      function removeItem(id) {
+        cart.items = cart.items.filter((i) => i.id !== id);
+        renderCart();
+      }
+      function clearCart() {
+        if (confirm("آیا از پاک کردن سبد مطمئن هستید؟")) {
+          cart.items = [];
+          renderCart();
+        }
+      }
+
+      function toggleCart(open) {
+        const drawer = document.getElementById("cart-drawer");
+        const isOpen = drawer.classList.contains("open");
+        if (open === undefined) open = !isOpen;
+        drawer.classList.toggle("open", open);
+        drawer.setAttribute("aria-hidden", !open);
+      }
+
+      function proceedToCheckout() {
+        if (cart.items.length === 0) return alert("سبد خرید خالی است");
+        // populate checkout summary and scroll to section
+        const summary = document.getElementById("checkout-summary");
+        summary.innerHTML = "";
+        const ul = document.createElement("div");
+        ul.style.display = "flex";
+        ul.style.flexDirection = "column";
+        ul.style.gap = "10px";
+        let total = 0;
+        cart.items.forEach((it) => {
+          total += (it.price || 0) * it.qty;
+          const row = document.createElement("div");
+          row.style.display = "flex";
+          row.style.justifyContent = "space-between";
+          row.style.alignItems = "center";
+          row.innerHTML = `<div>${it.name} × ${it.qty}</div><div>${
+            it.rawPrice || "$" + it.price
+          }</div>`;
+          ul.appendChild(row);
+        });
+        const totalRow = document.createElement("div");
+        totalRow.style.marginTop = "12px";
+        totalRow.style.fontWeight = "800";
+        totalRow.style.color = "#00ff88";
+        totalRow.textContent = `جمع کل: $${Number.isFinite(total) ? total : 0}`;
+        summary.appendChild(ul);
+        summary.appendChild(totalRow);
+        const actions = document.createElement("div");
+        actions.style.marginTop = "16px";
+        actions.innerHTML = `<button class="btn-primary" onclick="confirmOrder()">تأیید و پرداخت</button> <button class="btn-ghost" onclick="(function(){document.getElementById('checkout').style.display='none'; toggleCart(true);})()">بازگشت به سبد</button>`;
+        summary.appendChild(actions);
+
+        document.getElementById("checkout").style.display = "block";
+        document
+          .getElementById("checkout")
+          .scrollIntoView({ behavior: "smooth" });
+        toggleCart(false);
+      }
+
+      function confirmOrder() {
+        // A simple confirmation flow — in real app you'd send this to server
+        const name = prompt("نام خود را وارد کنید:");
+        if (!name) return alert("نام لازم است");
+        const phone = prompt("شماره تماس:");
+        if (!phone) return alert("شماره لازم است");
+        // show a success message
+        const summary = document.getElementById("checkout-summary");
+        summary.innerHTML = `<div style="padding:20px;border-radius:8px;background:linear-gradient(90deg,#071016,#0b1822);">سفارش شما با موفقیت ثبت شد. <br>با تشکر ${name} — تیم ابول در اسرع وقت تماس خواهد گرفت.</div>`;
+        // clear cart
+        cart.items = [];
+        renderCart();
+      }
+
+      // initialize
+      renderCart();
     </script>
   </body>
 </html>
-
